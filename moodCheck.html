@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>気分チェック</title>
+    <style>
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        @media (max-width: 600px) {
+            body {
+                font-size: 14px;
+            }
+            button {
+                width: 100%;
+            }
+        }
+        #history {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+    </style>
+    <script>
+        const apiKey = "23TATIgAH8OZfZqUzt92fcmr5tnNxxQmWs7a9xK8YmNGtHYmif6FJQQJ99BEACYeBjFXJ3w3AAAAACOGBTin"; // Azure AI Foundry API キー
+        const endpoint = "https://ai-hjun1051064726ai331033566091.openai.azure.com/"; // Azure AI Foundry エンドポイント
+
+        let currentQuestion = 0;
+        const questions = [
+            "最近、体調は良いですか？",
+            "最近、よく眠れていますか？",
+            "仕事や勉強は順調ですか？",
+            "友人や家族と楽しい時間を過ごしていますか？",
+            "将来に対して前向きな気持ちがありますか？",
+            "最近、ストレスを感じていますか？",
+            "運動や体を動かす時間を取れていますか？",
+            "趣味や好きなことを楽しめていますか？",
+            "食事はバランスよく取れていますか？",
+            "自分の時間を大切にできていますか？"
+        ];
+        const answers = [];
+
+        function askNextQuestion() {
+            if (currentQuestion < questions.length) {
+                document.getElementById("question").innerText = questions[currentQuestion];
+            } else {
+                calculateMood();
+            }
+        }
+
+        function recordAnswer(answer) {
+            answers.push(answer);
+            currentQuestion++;
+            askNextQuestion();
+        }
+
+        async function calculateMood() {
+            const name = document.getElementById("name").value || "匿名";
+            const combinedAnswers = answers.join(" ");
+            try {
+                const response = await fetch(`${endpoint}/text/analytics/v3.1/sentiment`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Ocp-Apim-Subscription-Key": apiKey
+                    },
+                    body: JSON.stringify({
+                        documents: [
+                            { id: "1", language: "ja", text: combinedAnswers }
+                        ]
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTPエラー: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const sentiment = data.documents[0].sentiment;
+                const scores = data.documents[0].confidenceScores;
+
+                // ポジティブスコアを100点満点で計算
+                const positiveScore = Math.round(scores.positive * 100);
+
+                let message = `${name}さん、`;
+                if (sentiment === "positive") {
+                    message += `全体的にポジティブな気分ですね！素晴らしいです！ (${positiveScore}/100点)`;
+                } else if (sentiment === "neutral") {
+                    message += `中立的な気分のようですね。穏やかに過ごしましょう。 (${positiveScore}/100点)`;
+                } else if (sentiment === "negative") {
+                    message += `少しネガティブな気分のようです。無理せずリラックスしてください。 (${positiveScore}/100点)`;
+                }
+
+                document.getElementById("response").innerText = message;
+
+                // 履歴に追加
+                addToHistory(name, combinedAnswers, sentiment, scores, positiveScore);
+            } catch (error) {
+                console.error("エラーが発生しました:", error);
+                document.getElementById("response").innerText = "エラーが発生しました。もう一度お試しください。";
+            }
+        }
+
+        function addToHistory(name, answers, sentiment, scores, positiveScore) {
+            const history = document.getElementById("history");
+            const entry = document.createElement("div");
+            entry.innerHTML = `
+                <p><strong>${name}</strong> - 回答: ${answers} - 感情: ${sentiment}</p>
+                <p>ポジティブ: ${scores.positive.toFixed(2)}, 中立: ${scores.neutral.toFixed(2)}, ネガティブ: ${scores.negative.toFixed(2)}</p>
+                <p>スコア: ${positiveScore}/100点</p>
+                <hr>
+            `;
+            history.prepend(entry);
+        }
+
+        window.onload = function() {
+            askNextQuestion();
+        };
+    </script>
+</head>
+<body>
+    <div>
+        <h2>気分チェック</h2>
+        <form>
+            <label for="name">名前:</label>
+            <input type="text" id="name" name="name" placeholder="名前を入力してください">
+        </form>
+        <p id="question"></p>
+        <div>
+            <button onclick="recordAnswer('とても当てはまる')">とても当てはまる</button>
+            <button onclick="recordAnswer('当てはまる')">当てはまる</button>
+            <button onclick="recordAnswer('どちらとも言えない')">どちらとも言えない</button>
+            <button onclick="recordAnswer('あまり当てはまらない')">あまり当てはまらない</button>
+            <button onclick="recordAnswer('全く当てはまらない')">全く当てはまらない</button>
+        </div>
+        <p id="response"></p>
+    </div>
+    <div id="history">
+        <h3>気分の履歴</h3>
+    </div>
+</body>
+</html>
