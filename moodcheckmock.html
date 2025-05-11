@@ -237,7 +237,7 @@
             const entry = document.createElement("div");
             entry.className = "history-entry";
             entry.innerHTML = `
-                <p><strong>${name}さん</strong> - 回答: ${answers} - 感情: ${sentiment}</p>
+                <p><strong>${name}さん</strong> - 感情: ${sentiment}</p>
                 <p>スコア: ${positiveScore}/100点</p>
                 <p>日時: ${formattedDate} ${formattedTime}</p>
             `;
@@ -259,6 +259,8 @@
 <body>
     <div class="container">
         <h2>気分チェック</h2>
+        <p>このサイトでは、10問の質問に答えていただき、5つの選択肢から選ぶ形式です。
+        最後にあなたの気分を点数化して結果を表示します！</p>
         <form>
             <label for="name">名前:</label>
             <input type="text" id="name" name="name" placeholder="名前を入力してください">
