@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>気分チェック（ローカル版）</title>
+    <style>
+        body {
+            font-family: "メイリオ", sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            background-image: url('background-image.jpg'); /* 背景画像を指定 */
+            background-size: cover; /* 画像を画面全体に拡大 */
+            background-position: center; /* 画像を中央に配置 */
+            background-attachment: fixed; /* 背景を固定 */
+            color: #333;
+            line-height: 1.6;
+        }
+        h2 {
+            text-align: center;
+            margin-top: 20px;
+            color: #4CAF50;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9); /* 背景を半透明に */
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        form {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        label {
+            font-weight: bold;
+        }
+        input[type="text"] {
+            padding: 10px;
+            width: 80%;
+            max-width: 400px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        #buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #question {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+        }
+        #response {
+            text-align: center;
+            font-size: 16px;
+            margin-top: 20px;
+            color: #555;
+        }
+        #response img {
+            display: block;
+            margin: 10px auto;
+            max-width: 100px;
+        }
+        #history {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.9); /* 背景を半透明に */
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        #history h3 {
+            margin-top: 0;
+            color: #4CAF50;
+        }
+        .history-entry {
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        @media (max-width: 600px) {
+            body {
+                font-size: 14px;
+            }
+            button {
+                width: 100%;
+            }
+        }
+        /* モーダルの背景 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        /* モーダルのコンテンツ */
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* モーダル内の画像 */
+        .modal-content img {
+            max-width: 300px;
+            height: auto;
+        }
+
+        /* 閉じるボタン */
+        .close-modal {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .close-modal:hover {
+            background-color: #45a049;
+        }
+    </style>
+    <script>
+        let currentQuestion = 0;
+        const questions = [
+            "最近、体調は良いですか？",
+            "最近、よく眠れていますか？",
+            "仕事や勉強は順調ですか？",
+            "友人や家族と楽しい時間を過ごしていますか？",
+            "将来に対して前向きな気持ちがありますか？",
+            "最近、ストレスを感じていますか？",
+            "運動や体を動かす時間を取れていますか？",
+            "趣味や好きなことを楽しめていますか？",
+            "食事はバランスよく取れていますか？",
+            "自分の時間を大切にできていますか？"
+        ];
+        let answers = [];
+
+        function askNextQuestion() {
+            if (currentQuestion < questions.length) {
+                document.getElementById("question").innerText = questions[currentQuestion];
+                document.getElementById("buttons").style.display = "flex";
+                document.getElementById("retry").style.display = "none";
+            } else {
+                calculateMood();
+            }
+        }
+
+        function recordAnswer(answer) {
+            answers.push(answer);
+            currentQuestion++;
+            askNextQuestion();
+        }
+
+        function calculateMood() {
+            const name = document.getElementById("name").value || "匿名";
+            const combinedAnswers = answers.join(" ");
+            
+            // モックデータで感情解析をシミュレーション
+            const mockSentiment = simulateSentimentAnalysis(combinedAnswers);
+            const positiveScore = Math.round(mockSentiment.positive * 100);
+
+            let message = `${name}さん、`;
+            let image = "";
+            if (mockSentiment.sentiment === "positive") {
+                message += `全体的にポジティブな気分ですね！素晴らしいです！ (${positiveScore}/100点)`;
+                image = "positive.png"; // ローカル画像
+            } else if (mockSentiment.sentiment === "neutral") {
+                message += `中立的な気分のようですね。穏やかに過ごしましょう。 (${positiveScore}/100点)`;
+                image = "neutral.png"; // ローカル画像
+            } else if (mockSentiment.sentiment === "negative") {
+                message += `少しネガティブな気分のようです。無理せずリラックスしてください。 (${positiveScore}/100点)`;
+                image = "negative.png"; // ローカル画像
+            }
+
+            document.getElementById("response").innerHTML = `${message}<img src="${image}" alt="感情イラスト">`;
+
+            // 履歴に追加
+            addToHistory(name, combinedAnswers, mockSentiment.sentiment, positiveScore);
+
+            // ボタンをリセット用に切り替え
+            document.getElementById("buttons").style.display = "none";
+            document.getElementById("retry").style.display = "block";
+        }
+
+        function simulateSentimentAnalysis(text) {
+            // モックデータでランダムな感情スコアを生成
+            const randomScore = Math.random();
+            if (randomScore > 0.7) {
+                return { sentiment: "positive", positive: randomScore };
+            } else if (randomScore > 0.4) {
+                return { sentiment: "neutral", positive: randomScore };
+            } else {
+                return { sentiment: "negative", positive: randomScore };
+            }
+        }
+
+        function addToHistory(name, answers, sentiment, positiveScore) {
+            const history = document.getElementById("history");
+
+            // 現在の日付と時間を取得
+            const now = new Date();
+            const formattedDate = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`;
+            const formattedTime = `${now.getHours()}時${now.getMinutes()}分${now.getSeconds()}秒`;
+
+            // 感情に応じたイラストを設定
+            let image = "";
+            if (sentiment === "positive") {
+                image = "positive.png";
+            } else if (sentiment === "neutral") {
+                image = "neutral.png";
+            } else if (sentiment === "negative") {
+                image = "negative.png";
+            }
+
+            const entry = document.createElement("div");
+            entry.className = "history-entry";
+            entry.innerHTML = `
+                <p><strong>${name}さん</strong> - 感情: ${sentiment}</p>
+                <p>スコア: ${positiveScore}/100点</p>
+                <img src="${image}" alt="${sentiment}のイラスト" style="max-width: 100px; display: block; margin: 10px auto;">
+                <p>日時: ${formattedDate} ${formattedTime}</p>
+            `;
+            history.prepend(entry);
+        }
+
+        function resetQuiz() {
+            currentQuestion = 0;
+            answers = [];
+            document.getElementById("response").innerText = "";
+            askNextQuestion();
+        }
+
+        window.onload = function() {
+            askNextQuestion();
+        };
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2>気分チェック</h2>
+        <p>このサイトでは、10問の質問に答えていただき、5つの選択肢から選ぶ形式です。
+        最後にあなたの気分を点数化して結果を表示します！</p>
+        <form>
+            <label for="name">名前:</label>
+            <input type="text" id="name" name="name" placeholder="名前を入力してください">
+        </form>
+        <p id="question"></p>
+        <div id="buttons">
+            <button onclick="recordAnswer('とても当てはまる')">とても当てはまる</button>
+            <button onclick="recordAnswer('当てはまる')">当てはまる</button>
+            <button onclick="recordAnswer('どちらとも言えない')">どちらとも言えない</button>
+            <button onclick="recordAnswer('あまり当てはまらない')">あまり当てはまらない</button>
+            <button onclick="recordAnswer('全く当てはまらない')">全く当てはまらない</button>
+        </div>
+        <div id="retry" style="display: none; text-align: center;">
+            <button onclick="resetQuiz()">もう一度質問する</button>
+        </div>
+        <p id="response"></p>
+        <div id="history">
+            <h3>気分の履歴</h3>
+        </div>
+    </div>
+</body>
+</html>
