@@ -279,11 +279,26 @@
             console.log("ページが読み込まれました");
             askNextQuestion();
         };
+
+        function openModal() {
+            document.getElementById("catModal").style.display = "flex";
+        }
+
+        function closeModal() {
+            document.getElementById("catModal").style.display = "none";
+        }
     </script>
 </head>
 <body>
     <div class="container">
         <h2>気分チェック</h2>
+        <button onclick="openModal()">ネコの画像を見る</button>
+        <div id="catModal" class="modal-overlay">
+            <div class="modal-content">
+                <img src="cat.png" alt="ネコの画像">
+                <button class="close-modal" onclick="closeModal()">閉じる</button>
+            </div>
+        </div>
         <p>このサイトでは、10問の質問に答えていただき、5つの選択肢から選ぶ形式です。
         最後にあなたの気分を点数化して結果を表示します！</p>
         <form>
@@ -306,9 +321,5 @@
             <h3>気分の履歴</h3>
         </div>
     </div>
-    </div>
-    <script>
-        // JavaScriptコード
-    </script>
 </body>
 </html>
