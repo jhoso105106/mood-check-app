@@ -185,21 +185,21 @@
 
         function calculateMood() {
             const name = document.getElementById("name").value || "匿名";
-            const combinedAnswers = answers.join(" ");
-            
-            // モックデータで感情解析をシミュレーション
-            const mockSentiment = simulateSentimentAnalysis(combinedAnswers);
-            const positiveScore = Math.round(mockSentiment.positive * 100);
+            const positiveAnswers = answers.filter(answer => answer === "とても当てはまる" || answer === "当てはまる").length;
+            const neutralAnswers = answers.filter(answer => answer === "どちらとも言えない").length;
+            const negativeAnswers = answers.filter(answer => answer === "あまり当てはまらない" || answer === "全く当てはまらない").length;
+
+            const positiveScore = Math.round((positiveAnswers / questions.length) * 100);
 
             let message = `${name}さん、`;
             let image = "";
-            if (mockSentiment.sentiment === "positive") {
+            if (positiveScore > 70) {
                 message += `全体的にポジティブな気分ですね！素晴らしいです！ (${positiveScore}/100点)`;
                 image = "positive.png"; // ローカル画像
-            } else if (mockSentiment.sentiment === "neutral") {
+            } else if (positiveScore > 40) {
                 message += `中立的な気分のようですね。穏やかに過ごしましょう。 (${positiveScore}/100点)`;
                 image = "neutral.png"; // ローカル画像
-            } else if (mockSentiment.sentiment === "negative") {
+            } else {
                 message += `少しネガティブな気分のようです。無理せずリラックスしてください。 (${positiveScore}/100点)`;
                 image = "negative.png"; // ローカル画像
             }
@@ -207,7 +207,7 @@
             document.getElementById("response").innerHTML = `${message}<img src="${image}" alt="感情イラスト">`;
 
             // 履歴に追加
-            addToHistory(name, combinedAnswers, mockSentiment.sentiment, positiveScore);
+            addToHistory(name, answers.join(" "), positiveScore > 70 ? "positive" : positiveScore > 40 ? "neutral" : "negative", positiveScore);
 
             // ボタンをリセット用に切り替え
             document.getElementById("buttons").style.display = "none";
@@ -237,7 +237,13 @@
             // 感情に応じたイラストを設定
             let image = "";
             if (sentiment === "positive") {
+                <!-- 
+                このファイルは、Mood Check MockアプリケーションのHTML構造を定義しています。
+
                 image = "positive.png";
+                この変数は、ポジティブな感情を表す画像ファイル（positive.png）を指定しています。
+                この画像は、ユーザーの感情状態を視覚的に表現するために使用される可能性があります。
+                -->
             } else if (sentiment === "neutral") {
                 image = "neutral.png";
             } else if (sentiment === "negative") {
