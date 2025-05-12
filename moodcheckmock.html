@@ -168,21 +168,28 @@
         ];
         let answers = [];
 
+        function recordAnswer(answer) {
+            answers.push(answer);
+            currentQuestion++;
+            askNextQuestion();
+        }
+
         function askNextQuestion() {
             console.log("askNextQuestionが呼び出されました");
             if (currentQuestion < questions.length) {
-                document.getElementById("question").innerText = questions[currentQuestion];
+                const questionElement = document.getElementById("question");
+                if (questionElement) {
+                    questionElement.innerText = questions[currentQuestion];
+                    console.log("質問が表示されました:", questions[currentQuestion]);
+                } else {
+                    console.error("質問を表示する要素が見つかりません");
+                }
+
                 document.getElementById("buttons").style.display = "flex";
                 document.getElementById("retry").style.display = "none";
             } else {
                 calculateMood();
             }
-        }
-
-        function recordAnswer(answer) {
-            answers.push(answer);
-            currentQuestion++;
-            askNextQuestion();
         }
 
         function calculateMood() {
@@ -239,13 +246,11 @@
             // 感情に応じたイラストを設定
             let image = "";
             if (sentiment === "positive") {
-                <!-- 
-                このファイルは、Mood Check MockアプリケーションのHTML構造を定義しています。
+                // このファイルは、Mood Check MockアプリケーションのHTML構造を定義しています。
 
                 image = "positive.png";
-                この変数は、ポジティブな感情を表す画像ファイル（positive.png）を指定しています。
-                この画像は、ユーザーの感情状態を視覚的に表現するために使用される可能性があります。
-                -->
+                // この変数は、ポジティブな感情を表す画像ファイル（positive.png）を指定しています。
+                // この画像は、ユーザーの感情状態を視覚的に表現するために使用される可能性があります。
             } else if (sentiment === "neutral") {
                 image = "neutral.png";
             } else if (sentiment === "negative") {
