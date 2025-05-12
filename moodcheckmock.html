@@ -169,6 +169,7 @@
         let answers = [];
 
         function askNextQuestion() {
+            console.log("askNextQuestionが呼び出されました");
             if (currentQuestion < questions.length) {
                 document.getElementById("question").innerText = questions[currentQuestion];
                 document.getElementById("buttons").style.display = "flex";
@@ -270,6 +271,7 @@
         }
 
         window.onload = function() {
+            console.log("ページが読み込まれました");
             askNextQuestion();
         };
     </script>
