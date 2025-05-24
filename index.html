@@ -251,6 +251,16 @@
             askNextQuestion();
         }
 
+        async function getAdviceFromAzure(answers) {
+            const response = await fetch('/api/azure-language', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ answers })
+            });
+            const data = await response.json();
+            // dataの中からアドバイスを取り出して画面に表示
+        }
+
         window.onload = function() {
             askNextQuestion();
         };
