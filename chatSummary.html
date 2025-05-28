@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>AIチャット要約・スコア</title>
+    <style>
+        body { font-family: "メイリオ", sans-serif; background: #f4f4f9; }
+        .container { max-width: 700px; margin: 40px auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #ccc; padding: 24px; }
+        h2 { text-align: center; color: #4CAF50; }
+        .summary-box { background: #f9f9f9; border-radius: 8px; padding: 16px; margin-bottom: 24px; box-shadow: 0 1px 3px #eee; }
+        .score { font-size: 2em; color: #1976d2; text-align: center; margin: 16px 0; }
+        .nav-btns { display: flex; gap: 16px; justify-content: center; margin-bottom: 24px; }
+        .nav-btns button { padding: 10px 24px; font-size: 16px; border-radius: 6px; border: 1px solid #4CAF50; background: #4CAF50; color: #fff; cursor: pointer; }
+        .nav-btns button.graph { border: 1px solid #1976d2; background: #1976d2; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav-btns">
+            <button onclick="location.href='moodcheckmock.html'">気分チェック</button>
+            <button onclick="location.href='chatPage.html'">AIチャット</button>
+            <button class="graph" onclick="location.href='scoreGraph.html'">スコアグラフ</button>
+        </div>
+        <h2>AIチャット要約・スコア</h2>
+        <div class="summary-box" id="summaryBox">
+            <b>直近のAIチャット要約:</b>
+            <div id="summaryText">要約を取得中...</div>
+        </div>
+        <div class="score">
+            <span id="scoreValue">--</span> / 100 点
+        </div>
+    </div>
+    <script>
+    // チャット履歴から直近のやり取りをまとめて要約・点数化
+    function getChatSummaryAndScore() {
+        const chatHistory = JSON.parse(localStorage.getItem('chatHistory') || '[]');
+        if (chatHistory.length === 0) {
+            document.getElementById('summaryText').textContent = 'チャット履歴がありません。';
+            document.getElementById('scoreValue').textContent = '--';
+            return;
+        }
+        // 直近20件のやり取りをまとめて要約
+        const recent = chatHistory.slice(-20);
+        let allText = '';
+        recent.forEach(msg => {
+            if (msg.role === 'user') allText += 'ユーザー: ' + msg.content + '\n';
+            if (msg.role === 'ai') allText += 'AI: ' + msg.content + '\n';
+        });
+        // 簡易要約（AI未使用: 先頭100文字）
+        let summary = allText.length > 100 ? allText.slice(0, 100) + '...' : allText;
+        document.getElementById('summaryText').textContent = summary;
+        // 点数化（AI未使用: ポジティブワード数で仮点数）
+        const positiveWords = ['ありがとう','良い','素晴らしい','楽しい','嬉しい','最高','できた','前向き','大丈夫','安心','好き'];
+        let score = 50;
+        let count = 0;
+        positiveWords.forEach(word => {
+            if (allText.includes(word)) count++;
+        });
+        score = Math.min(100, 50 + count * 10);
+        document.getElementById('scoreValue').textContent = score;
+    }
+    window.onload = getChatSummaryAndScore;
+    </script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat API チャットUI</title>
+    <style>
+        body { font-family: "メイリオ", sans-serif; background: #f4f4f9; }
+        .chat-container { max-width: 600px; margin: 40px auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #ccc; padding: 24px; }
+        h2 { text-align: center; color: #4CAF50; }
+        #chat-history { min-height: 200px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 6px; padding: 12px; background: #fafafa; overflow-y: auto; }
+        .msg-user { text-align: right; color: #2196F3; margin: 8px 0; }
+        .msg-ai { text-align: left; color: #4CAF50; margin: 8px 0; }
+        #input-area { display: flex; gap: 8px; }
+        #user-input { flex: 1; padding: 8px; font-size: 16px; border-radius: 4px; border: 1px solid #ccc; }
+        #send-btn { padding: 8px 20px; background: #4CAF50; color: #fff; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; }
+        #send-btn:hover { background: #388e3c; }
+        #history-btn { margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <h2>AIチャット</h2>
+        <div id="chat-history"></div>
+        <div id="input-area">
+            <input type="text" id="user-input" placeholder="メッセージを入力..." onkeydown="if(event.key==='Enter'){sendChat();}">
+            <button id="send-btn" onclick="sendChat()">送信</button>
+        </div>
+        <button id="history-btn" onclick="getHistory()">履歴を再取得</button>
+    </div>
+    <script>
+    let chatHistory = [];
+
+    function appendMessage(role, content) {
+        const chatDiv = document.getElementById('chat-history');
+        const msgDiv = document.createElement('div');
+        msgDiv.className = role === 'user' ? 'msg-user' : 'msg-ai';
+        msgDiv.textContent = (role === 'user' ? 'あなた: ' : 'AI: ') + content;
+        chatDiv.appendChild(msgDiv);
+        chatDiv.scrollTop = chatDiv.scrollHeight;
+    }
+
+    function sendChat() {
+        const input = document.getElementById('user-input');
+        const text = input.value.trim();
+        if (!text) return;
+        appendMessage('user', text);
+        input.value = '';
+        fetch('http://localhost:3001/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_input: text })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.ai_response) {
+                appendMessage('ai', data.ai_response);
+            } else if(data.error) {
+                appendMessage('ai', 'エラー: ' + data.error);
+            }
+        })
+        .catch(err => appendMessage('ai', '通信エラー: ' + err));
+    }
+
+    function getHistory() {
+        fetch('http://localhost:3001/api/chat-history')
+        .then(res => res.json())
+        .then(data => {
+            const chatDiv = document.getElementById('chat-history');
+            chatDiv.innerHTML = '';
+            if(data.history && data.history.length > 0) {
+                data.history.forEach(entry => {
+                    if (entry.user_input == null) return; // nullはスキップ
+                    if(entry.mood === 'AI' || entry.mood === 'assistant') {
+                        appendMessage('ai', entry.user_input);
+                    } else {
+                        appendMessage('user', entry.user_input);
+                    }
+                });
+            } else {
+                chatDiv.textContent = '履歴はありません。';
+            }
+        });
+    }
+
+    // 初回履歴取得
+    getHistory();
+    </script>
+</body>
+</html>

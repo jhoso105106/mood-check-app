@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>気分スコア推移グラフ</title>
+    <style>
+        body { font-family: "メイリオ", sans-serif; background: #f4f4f9; }
+        .container { max-width: 700px; margin: 40px auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #ccc; padding: 24px; }
+        h2 { text-align: center; color: #4CAF50; }
+    </style>
+</head>
+<body>
+    <div class="container" style="margin-top:20px;">
+        <div style="display:flex;gap:16px;justify-content:center;">
+            <button onclick="location.href='moodcheckmock.html'" style="padding:10px 24px;font-size:16px;border-radius:6px;border:1px solid #4CAF50;background:#4CAF50;color:#fff;cursor:pointer;">AIチャット</button>
+            <button onclick="location.href='scoreGraph.html'" style="padding:10px 24px;font-size:16px;border-radius:6px;border:1px solid #1976d2;background:#1976d2;color:#fff;cursor:pointer;">スコアグラフ</button>
+        </div>
+    </div>
+    <div class="container">
+        <h2>気分スコアの推移グラフ</h2>
+        <div style="text-align:center;margin-bottom:16px;">
+            <input type="text" id="filterName" placeholder="名前で絞り込み" style="padding:6px 12px;border-radius:4px;border:1px solid #ccc;">
+            <button onclick="drawScoreChart()" style="padding:6px 16px;">絞り込む</button>
+            <button onclick="resetFilterName()" style="padding:6px 16px;">リセット</button>
+        </div>
+        <canvas id="scoreChart" width="600" height="300"></canvas>
+        <button onclick="location.href='moodcheckmock.html'" style="margin-top:20px;">AIチャットに戻る</button>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+    function getHistoryScores() {
+        const moodHistory = JSON.parse(localStorage.getItem('moodHistory') || '[]');
+        const filter = document.getElementById('filterName') ? document.getElementById('filterName').value.trim() : '';
+        const scores = [];
+        const labels = [];
+        moodHistory.forEach(h => {
+            if(h.score && h.date && h.time && (!filter || (h.name && h.name.includes(filter)))) {
+                scores.push(Number(h.score));
+                labels.push(h.date + ' ' + h.time);
+            }
+        });
+        return { scores, labels };
+    }
+    function drawScoreChart() {
+        const ctx = document.getElementById('scoreChart').getContext('2d');
+        const { scores, labels } = getHistoryScores();
+        if(window.scoreChartObj) window.scoreChartObj.destroy();
+        window.scoreChartObj = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '気分スコア',
+                    data: scores,
+                    borderColor: '#4CAF50',
+                    backgroundColor: 'rgba(76,175,80,0.1)',
+                    fill: true,
+                    tension: 0.2,
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                scales: {
+                    y: { min: 0, max: 100, title: { display: true, text: 'スコア' } },
+                    x: { title: { display: true, text: '日時' }, ticks: { maxRotation: 60, minRotation: 30 } }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    }
+    function resetFilterName() {
+        document.getElementById('filterName').value = '';
+        drawScoreChart();
+    }
+    window.onload = drawScoreChart;
+    </script>
+</body>
+</html>

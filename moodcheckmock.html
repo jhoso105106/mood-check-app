@@ -246,16 +246,23 @@
             // 感情に応じたイラストを設定
             let image = "";
             if (sentiment === "positive") {
-                // このファイルは、Mood Check MockアプリケーションのHTML構造を定義しています。
-
                 image = "positive.png";
-                // この変数は、ポジティブな感情を表す画像ファイル（positive.png）を指定しています。
-                // この画像は、ユーザーの感情状態を視覚的に表現するために使用される可能性があります。
             } else if (sentiment === "neutral") {
                 image = "neutral.png";
             } else if (sentiment === "negative") {
                 image = "negative.png";
             }
+
+            // localStorageへ履歴保存
+            let moodHistory = JSON.parse(localStorage.getItem('moodHistory') || '[]');
+            moodHistory.push({
+                name,
+                date: formattedDate,
+                time: formattedTime,
+                score: positiveScore,
+                sentiment
+            });
+            localStorage.setItem('moodHistory', JSON.stringify(moodHistory));
 
             const entry = document.createElement("div");
             entry.className = "history-entry";
@@ -318,6 +325,14 @@
         <p id="response"></p>
         <div id="history">
             <h3>気分の履歴</h3>
+        </div>
+    </div>
+    <!-- ナビゲーションタブ追加 -->
+    <div class="container" style="margin-top:20px;">
+        <div style="display:flex;gap:16px;justify-content:center;">
+            <button onclick="location.href='moodcheckmock.html'" style="padding:10px 24px;font-size:16px;border-radius:6px;border:1px solid #4CAF50;background:#4CAF50;color:#fff;cursor:pointer;">気分チェック</button>
+            <button onclick="location.href='chatPage.html'" style="padding:10px 24px;font-size:16px;border-radius:6px;border:1px solid #4CAF50;background:#4CAF50;color:#fff;cursor:pointer;">AIチャット</button>
+            <button onclick="location.href='scoreGraph.html'" style="padding:10px 24px;font-size:16px;border-radius:6px;border:1px solid #1976d2;background:#1976d2;color:#fff;cursor:pointer;">スコアグラフ</button>
         </div>
     </div>
 </body>
