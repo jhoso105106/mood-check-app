@@ -28,53 +28,55 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-    function getHistoryScores() {
-        const moodHistory = JSON.parse(localStorage.getItem('moodHistory') || '[]');
-        const filter = document.getElementById('filterName') ? document.getElementById('filterName').value.trim() : '';
-        const scores = [];
-        const labels = [];
-        moodHistory.forEach(h => {
-            if(h.score && h.date && h.time && (!filter || (h.name && h.name.includes(filter)))) {
-                scores.push(Number(h.score));
-                labels.push(h.date + ' ' + h.time);
-            }
-        });
-        return { scores, labels };
-    }
-    function drawScoreChart() {
-        const ctx = document.getElementById('scoreChart').getContext('2d');
-        const { scores, labels } = getHistoryScores();
-        if(window.scoreChartObj) window.scoreChartObj.destroy();
-        window.scoreChartObj = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: '気分スコア',
-                    data: scores,
-                    borderColor: '#4CAF50',
-                    backgroundColor: 'rgba(76,175,80,0.1)',
-                    fill: true,
-                    tension: 0.2,
-                    pointRadius: 4
-                }]
-            },
-            options: {
-                scales: {
-                    y: { min: 0, max: 100, title: { display: true, text: 'スコア' } },
-                    x: { title: { display: true, text: '日時' }, ticks: { maxRotation: 60, minRotation: 30 } }
-                },
-                plugins: {
-                    legend: { display: false }
-                }
-            }
-        });
+    let chartInstance = null;
+    function loadHistory() {
+        const name = document.getElementById('filterName').value.trim();
+        let url = '/api/get-history';
+        if (name) url += '?name=' + encodeURIComponent(name);
+        fetch(url)
+            .then(res => res.json())
+            .then(data => {
+                const history = data.history || [];
+                const labels = history.map(h => h.date + ' ' + h.time);
+                const scores = history.map(h => h.score);
+                const ctx = document.getElementById('scoreChart').getContext('2d');
+                if (chartInstance) chartInstance.destroy();
+                chartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: '気分スコア',
+                            data: scores,
+                            borderColor: '#4CAF50',
+                            backgroundColor: 'rgba(76,175,80,0.1)',
+                            fill: true,
+                            tension: 0.2,
+                            pointRadius: 4
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: { min: 0, max: 100, title: { display: true, text: 'スコア' } },
+                            x: { title: { display: true, text: '日時' }, ticks: { maxRotation: 60, minRotation: 30 } }
+                        },
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+            })
+            .catch(err => {
+                alert('履歴データの取得に失敗しました');
+                console.error(err);
+            });
     }
     function resetFilterName() {
         document.getElementById('filterName').value = '';
-        drawScoreChart();
+        loadHistory();
     }
-    window.onload = drawScoreChart;
+    // 初期表示
+    window.onload = loadHistory;
     </script>
 </body>
 </html>
