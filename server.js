@@ -172,5 +172,16 @@ app.get('/api/get-history', async (req, res) => {
     }
 });
 
+// /api/chat-history エンドポイント追加（chatServer.jsと同じ内容）
+app.get('/api/chat-history', async (req, res) => {
+    try {
+        await sql.connect(sqlConfig);
+        const result = await sql.query`SELECT * FROM mood_history ORDER BY timestamp`;
+        res.json({ history: result.recordset });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log('Server started on port ' + port));
