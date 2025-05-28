@@ -33,31 +33,40 @@
     <script>
     // チャット履歴から直近のやり取りをまとめて要約・点数化
     function getChatSummaryAndScore() {
-        const chatHistory = JSON.parse(localStorage.getItem('chatHistory') || '[]');
-        if (chatHistory.length === 0) {
-            document.getElementById('summaryText').textContent = 'チャット履歴がありません。';
-            document.getElementById('scoreValue').textContent = '--';
-            return;
-        }
-        // 直近20件のやり取りをまとめて要約
-        const recent = chatHistory.slice(-20);
-        let allText = '';
-        recent.forEach(msg => {
-            if (msg.role === 'user') allText += 'ユーザー: ' + msg.content + '\n';
-            if (msg.role === 'ai') allText += 'AI: ' + msg.content + '\n';
-        });
-        // 簡易要約（AI未使用: 先頭100文字）
-        let summary = allText.length > 100 ? allText.slice(0, 100) + '...' : allText;
-        document.getElementById('summaryText').textContent = summary;
-        // 点数化（AI未使用: ポジティブワード数で仮点数）
-        const positiveWords = ['ありがとう','良い','素晴らしい','楽しい','嬉しい','最高','できた','前向き','大丈夫','安心','好き'];
-        let score = 50;
-        let count = 0;
-        positiveWords.forEach(word => {
-            if (allText.includes(word)) count++;
-        });
-        score = Math.min(100, 50 + count * 10);
-        document.getElementById('scoreValue').textContent = score;
+        fetch('/api/chat-history')
+            .then(res => res.json())
+            .then(data => {
+                const chatHistory = data.history || [];
+                if (chatHistory.length === 0) {
+                    document.getElementById('summaryText').textContent = 'チャット履歴がありません。';
+                    document.getElementById('scoreValue').textContent = '--';
+                    return;
+                }
+                // 直近20件のやり取りをまとめて要約
+                const recent = chatHistory.slice(-20);
+                let allText = '';
+                recent.forEach(msg => {
+                    if (msg.mood === 'AI' || msg.mood === 'assistant') allText += 'AI: ' + (msg.user_input || '') + '\n';
+                    else allText += 'ユーザー: ' + (msg.user_input || '') + '\n';
+                });
+                // 簡易要約（AI未使用: 先頭100文字）
+                let summary = allText.length > 100 ? allText.slice(0, 100) + '...' : allText;
+                document.getElementById('summaryText').textContent = summary;
+                // 点数化（AI未使用: ポジティブワード数で仮点数）
+                const positiveWords = ['ありがとう','良い','素晴らしい','楽しい','嬉しい','最高','できた','前向き','大丈夫','安心','好き'];
+                let score = 50;
+                let count = 0;
+                positiveWords.forEach(word => {
+                    if (allText.includes(word)) count++;
+                });
+                score = Math.min(100, 50 + count * 10);
+                document.getElementById('scoreValue').textContent = score;
+            })
+            .catch(err => {
+                document.getElementById('summaryText').textContent = '履歴取得エラー';
+                document.getElementById('scoreValue').textContent = '--';
+                console.error(err);
+            });
     }
     window.onload = getChatSummaryAndScore;
     </script>
