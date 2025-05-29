@@ -36,6 +36,11 @@
                     allNames = names;
                     const select = document.getElementById('filterNameSelect');
                     select.innerHTML = '<option value="">（全員）</option>' + names.map(n => `<option value="${n}">${n}</option>`).join('');
+                    console.log('select options:', select.innerHTML); // デバッグ用
+                })
+                .catch(err => {
+                    alert('名前リスト取得エラー: ' + err);
+                    console.error(err);
                 });
         }
         function loadHistory() {
