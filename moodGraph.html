@@ -87,8 +87,12 @@
         }
         // 初期表示
         window.onload = function() {
-            fetchNames();
-            loadHistory();
+            try {
+                fetchNames();
+                loadHistory();
+            } catch(e) {
+                alert('初期化エラー: ' + e);
+            }
         };
     </script>
 </body>
