@@ -16,6 +16,10 @@ const sqlConfig = {
     options: { encrypt: true, trustServerCertificate: false }
 };
 
+// 環境変数の確認
+console.log('OPENAI_ENDPOINT:', process.env.OPENAI_ENDPOINT);
+console.log('OPENAI_API_KEY:', process.env.OPENAI_API_KEY ? 'set' : 'not set');
+
 // チャット履歴取得
 app.get('/api/chat-history', async (req, res) => {
     try {
