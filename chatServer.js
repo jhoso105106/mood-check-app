@@ -31,6 +31,23 @@ app.get('/api/chat-history', async (req, res) => {
     }
 });
 
+// 履歴取得
+app.get('/api/get-history', async (req, res) => {
+    try {
+        await sql.connect(sqlConfig);
+        const { name } = req.query;
+        let result;
+        if (name) {
+            result = await sql.query`SELECT * FROM mood_history WHERE name = ${name} ORDER BY date, time`;
+        } else {
+            result = await sql.query`SELECT * FROM mood_history ORDER BY date, time`;
+        }
+        res.json({ history: result.recordset });
+    } catch (err) {
+        res.status(500).json({ error: 'DB取得に失敗しました', detail: err.message });
+    }
+});
+
 // チャット送信＆AI応答
 app.post('/api/chat', async (req, res) => {
     const { user_input } = req.body;
