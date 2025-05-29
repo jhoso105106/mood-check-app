@@ -32,6 +32,7 @@
                 .then(res => res.json())
                 .then(data => {
                     const history = data.history || [];
+                    console.log('history:', history); // デバッグ用
                     const names = Array.from(new Set(history.map(h => h.name).filter(Boolean)));
                     allNames = names;
                     const select = document.getElementById('filterNameSelect');
