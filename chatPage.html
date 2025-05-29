@@ -52,15 +52,15 @@
         if (!text) return;
         appendChat('user', text);
         input.value = '';
-        fetch('https://mood-check-api-hjun.azurewebsites.net/api/azure-language', {
+        fetch('/api/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ answers: [text] })
+            body: JSON.stringify({ user_input: text })
         })
         .then(res => res.json())
         .then(data => {
-            if(data.result) {
-                appendChat('ai', data.result);
+            if(data.ai_response) {
+                appendChat('ai', data.ai_response);
             } else if(data.error) {
                 appendChat('ai', 'エラー: ' + data.error);
             }
