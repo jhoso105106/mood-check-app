@@ -55,12 +55,12 @@
         fetch('https://mood-check-api-hjun.azurewebsites.net/api/azure-language', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_input: text })
+            body: JSON.stringify({ answers: [text] })
         })
         .then(res => res.json())
         .then(data => {
-            if(data.ai_response) {
-                appendChat('ai', data.ai_response);
+            if(data.result) {
+                appendChat('ai', data.result);
             } else if(data.error) {
                 appendChat('ai', 'エラー: ' + data.error);
             }
