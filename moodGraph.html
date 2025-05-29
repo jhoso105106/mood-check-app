@@ -16,7 +16,9 @@
         <button id="backBtn" onclick="location.href='index.html'">← 戻る</button>
         <h2>気分スコアの推移グラフ</h2>
         <div style="text-align:center;margin-bottom:20px;">
-            <select id="filterNameSelect" style="padding:6px 12px;border-radius:4px;border:1px solid #ccc;"></select>
+            <select id="filterNameSelect" style="padding:6px 12px;border-radius:4px;border:1px solid #ccc;">
+                <option value="">（全員）</option>
+            </select>
             <button onclick="loadHistory()" style="padding:6px 16px;">絞り込む</button>
             <button onclick="resetFilter()" style="padding:6px 16px;">リセット</button>
         </div>
