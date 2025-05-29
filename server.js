@@ -3,9 +3,11 @@ require('dotenv').config();
 const express = require('express');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const sql = require('mssql');
+const cors = require('cors');
 const app = express();
 app.use(express.json());
 app.use(express.static(__dirname));
+app.use(cors());
 
 // 環境変数まとめて取得
 const {
