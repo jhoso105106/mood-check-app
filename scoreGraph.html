@@ -19,7 +19,9 @@
     <div class="container">
         <h2>気分スコアの推移グラフ</h2>
         <div style="text-align:center;margin-bottom:16px;">
-            <input type="text" id="filterName" placeholder="名前で絞り込み" style="padding:6px 12px;border-radius:4px;border:1px solid #ccc;">
+            <select id="filterNameSelect" style="padding:6px 12px;border-radius:4px;border:1px solid #ccc;">
+                <option value="">（全員）</option>
+            </select>
             <button onclick="loadHistory()" style="padding:6px 16px;">絞り込む</button>
             <button onclick="resetFilterName()" style="padding:6px 16px;">リセット</button>
         </div>
@@ -29,8 +31,18 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
     let chartInstance = null;
+    function fetchNames() {
+        fetch('/api/get-history')
+            .then(res => res.json())
+            .then(data => {
+                const history = data.history || [];
+                const names = Array.from(new Set(history.map(h => h.name).filter(Boolean)));
+                const select = document.getElementById('filterNameSelect');
+                select.innerHTML = '<option value="">（全員）</option>' + names.map(n => `<option value="${n}">${n}</option>`).join('');
+            });
+    }
     function loadHistory() {
-        const name = document.getElementById('filterName').value.trim();
+        const name = document.getElementById('filterNameSelect').value.trim();
         let url = '/api/get-history';
         if (name) url += '?name=' + encodeURIComponent(name);
         fetch(url)
@@ -72,11 +84,13 @@
             });
     }
     function resetFilterName() {
-        document.getElementById('filterName').value = '';
+        document.getElementById('filterNameSelect').value = '';
         loadHistory();
     }
-    // 初期表示
-    window.onload = loadHistory;
+    window.onload = function() {
+        fetchNames();
+        loadHistory();
+    };
     </script>
 </body>
 </html>
