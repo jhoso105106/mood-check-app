@@ -81,8 +81,10 @@
             loadHistory();
         }
         // 初期表示
-        fetchNames();
-        loadHistory();
+        window.onload = function() {
+            fetchNames();
+            loadHistory();
+        };
     </script>
 </body>
 </html>
