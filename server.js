@@ -164,48 +164,5 @@ app.get('/api/chat-history', async (req, res) => {
     }
 });
 
-// OpenAI GPT会話APIエンドポイント追加
-const axios = require('axios');
-app.post('/api/chat', async (req, res) => {
-    const { user_input } = req.body;
-    const timestamp = new Date();
-    let ai_response = '';
-    let mood = '';
-    try {
-        // Azure OpenAI API呼び出し
-        const openaiRes = await axios.post(
-            `${process.env.OPENAI_ENDPOINT}/openai/deployments/gpt-35-turbo/chat/completions?api-version=2023-05-15`,
-            {
-                messages: [
-                    { role: 'system', content: 'あなたは親切なAIチャットボットです。' },
-                    { role: 'user', content: user_input }
-                ],
-                max_tokens: 256,
-                temperature: 0.7
-            },
-            {
-                headers: {
-                    'api-key': process.env.OPENAI_API_KEY,
-                    'Content-Type': 'application/json'
-                }
-            }
-        );
-        ai_response = openaiRes.data.choices[0].message.content;
-        mood = 'AI';
-        await sql.connect(sqlConfig);
-        await sql.query`
-            INSERT INTO mood_history (user_input, mood, timestamp)
-            VALUES (${user_input}, ${mood}, ${timestamp})
-        `;
-        await sql.query`
-            INSERT INTO mood_history (user_input, mood, timestamp)
-            VALUES (${ai_response}, 'assistant', ${timestamp})
-        `;
-        res.json({ user_input, ai_response, timestamp });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
 const port = PORT || 3000;
 app.listen(port, () => console.log('Server started on port ' + port));
