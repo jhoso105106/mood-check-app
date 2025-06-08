@@ -2,5 +2,7 @@
     "appService.zipIgnorePattern": [
         "node_modules{,/**}",
         ".vscode{,/**}"
-    ]
+    ],
+    "appService.defaultWebAppToDeploy": "/subscriptions/5df27a5e-e9d6-4144-94b9-5e6efc275ef5/resourceGroups/hackathon-db-group/providers/Microsoft.Web/sites/mood-check-api-hjun",
+    "appService.deploySubpath": "."
 }
