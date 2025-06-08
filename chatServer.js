@@ -96,4 +96,5 @@ app.get('/', (req, res) => {
     res.send('Chat APIサーバー稼働中です。エンドポイント: /api/chat, /api/chat-history');
 });
 
-app.listen(3001, () => console.log('Chat server started on port 3001'));
+const port = process.env.PORT || 3001;
+app.listen(port, () => console.log(`Chat server started on port ${port}`));
